@@ -4,10 +4,11 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PostController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProfileController;
 use Inertia\Inertia;
 /*
 |--------------------------------------------------------------------------
-| Web Routes
+| Web Routes    
 |--------------------------------------------------------------------------
 |
 | Here is where you can register web routes for your application. These
@@ -17,7 +18,7 @@ use Inertia\Inertia;
 */
 // Post Routes
 Route::resource('posts', PostController::class);
-
+Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
 // Comment Routes
 Route::post('posts/{post}/comments', [CommentController::class, 'store'])->name('comments.store');
 
