@@ -14,12 +14,10 @@ class PostController extends Controller
         return view('posts.index', compact('posts'));
     }
 
-    public function show($id)
+    public function show(Post $post)
     {
-        $post = Post::findOrFail($id);
         return view('posts.show', compact('post'));
     }
-
     public function create()
     {
         return view('posts.create');
@@ -27,34 +25,33 @@ class PostController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
         ]);
-
-        $post = Post::create([
-            'title' => $validated['title'],
-            'content' => $validated['content'],
-            'user_id' => Auth::id(),
+    
+        Post::create([
+            'title' => $request->title,
+            'content' => $request->content,
+            'user_id' => auth()->id(),
         ]);
-
-        return response()->json($post, 201);
+    
+        return redirect()->route('posts.index');
     }
-    public function edit($id)
+    public function edit(Post $post)
     {
-        $post = Post::findOrFail($id);
         return view('posts.edit', compact('post'));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Post $post)
     {
-        $post = Post::findOrFail($id);
-        $validated = $request->validate([
+        $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
         ]);
-
-        $post->update($validated);
+    
+        $post->update($request->only(['title', 'content']));
+    
         return redirect()->route('posts.index');
     }
 
