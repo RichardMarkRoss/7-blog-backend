@@ -17,12 +17,12 @@ use App\Http\Controllers\AuthController;
 */
 
 
-// Authentication Routes
+// Authentication
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
-// Post Routes
+// Post
 Route::get('/posts', [PostController::class, 'index']);
 Route::get('/posts/{id}', [PostController::class, 'show']);
 Route::middleware('auth:sanctum')->group(function () {
@@ -31,7 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/posts/{id}', [PostController::class, 'destroy']);
 });
 
-// Comment Routes
+// Comment
 Route::get('/posts/{postId}/comments', [CommentController::class, 'index']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/posts/{postId}/comments', [CommentController::class, 'store']);

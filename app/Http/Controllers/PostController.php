@@ -5,29 +5,37 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Post;
 use Illuminate\Support\Facades\Auth;
+
 class PostController extends Controller
 {
     public function index()
     {
-        return response()->json(Post::all());
+        $posts = Post::all();
+        return response()->json($posts);
     }
 
     public function show($id)
     {
-        return response()->json(Post::findOrFail($id));
+        $post = Post::find($id);
+
+        if (!$post) {
+            return response()->json(['message' => 'Post not found'], 404);
+        }
+
+        return response()->json($post);
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
         ]);
 
         $post = Post::create([
-            'title' => $validated['title'],
-            'content' => $validated['content'],
-            'user_id' => $request->user()->id,
+            'title' => $request->title,
+            'content' => $request->content,
+            'user_id' => Auth::id(),
         ]);
 
         return response()->json($post, 201);
@@ -35,22 +43,40 @@ class PostController extends Controller
 
     public function update(Request $request, $id)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
+        $post = Post::find($id);
+
+        if (!$post) {
+            return response()->json(['message' => 'Post not found'], 404);
+        }
+
+        if ($post->user_id !== Auth::id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $request->validate([
+            'title' => 'sometimes|required|string|max:255',
+            'content' => 'sometimes|required|string',
         ]);
 
-        $post = Post::findOrFail($id);
-        $post->update($validated);
+        $post->update($request->only(['title', 'content']));
 
         return response()->json($post);
     }
 
     public function destroy($id)
     {
-        $post = Post::findOrFail($id);
+        $post = Post::find($id);
+
+        if (!$post) {
+            return response()->json(['message' => 'Post not found'], 404);
+        }
+
+        if ($post->user_id !== Auth::id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $post->delete();
 
-        return response()->json(null, 204);
+        return response()->json(['message' => 'Post deleted successfully']);
     }
 }
