@@ -17,23 +17,16 @@ use App\Http\Controllers\AuthController;
 */
 
 
-// Authentication
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
-// Post
 Route::get('/posts', [PostController::class, 'index']);
 Route::get('/posts/{id}', [PostController::class, 'show']);
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/posts', [PostController::class, 'store']);
-    Route::put('/posts/{id}', [PostController::class, 'update']);
-    Route::delete('/posts/{id}', [PostController::class, 'destroy']);
-});
+Route::post('/posts', [PostController::class, 'store'])->middleware('auth:sanctum');
+Route::put('/posts/{id}', [PostController::class, 'update'])->middleware('auth:sanctum');
+Route::delete('/posts/{id}', [PostController::class, 'destroy'])->middleware('auth:sanctum');
 
-// Comment
 Route::get('/posts/{postId}/comments', [CommentController::class, 'index']);
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/posts/{postId}/comments', [CommentController::class, 'store']);
-    Route::delete('/comments/{id}', [CommentController::class, 'destroy']);
-});
+Route::post('/posts/{postId}/comments', [CommentController::class, 'store'])->middleware('auth:sanctum');
+Route::delete('/comments/{id}', [CommentController::class, 'destroy'])->middleware('auth:sanctum');

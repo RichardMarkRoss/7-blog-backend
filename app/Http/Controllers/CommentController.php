@@ -1,42 +1,30 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Comment;
-use App\Models\Post;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Auth;
+use App\Models\Post;
 
 class CommentController extends Controller
 {
     public function index($postId)
     {
-        $post = Post::find($postId);
-
-        if (!$post) {
-            return response()->json(['message' => 'Post not found'], 404);
-        }
-
-        $comments = $post->comments()->get();
-
+        $comments = Comment::where('post_id', $postId)->get();
         return response()->json($comments);
     }
 
     public function store(Request $request, $postId)
     {
-        $post = Post::find($postId);
-
-        if (!$post) {
-            return response()->json(['message' => 'Post not found'], 404);
-        }
-
         $request->validate([
-            'content' => 'required|string|max:1000',
+            'content' => 'required|string|max:255',
         ]);
 
         $comment = new Comment();
-        $comment->content = $request->content;
-        $comment->post_id = $postId;
+        $comment->content = $request->input('content');
         $comment->user_id = Auth::id();
+        $comment->post_id = $postId;
         $comment->save();
 
         return response()->json($comment, 201);
@@ -44,18 +32,13 @@ class CommentController extends Controller
 
     public function destroy($id)
     {
-        $comment = Comment::find($id);
+        $comment = Comment::findOrFail($id);
 
-        if (!$comment) {
-            return response()->json(['message' => 'Comment not found'], 404);
-        }
-
-        if ($comment->user_id !== Auth::id()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+        if ($comment->user_id != Auth::id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
         }
 
         $comment->delete();
-
-        return response()->json(['message' => 'Comment deleted successfully']);
+        return response()->json(null, 204);
     }
 }
